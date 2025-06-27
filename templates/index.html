@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân Tích Tình Cảm</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Phân Tích Tình Cảm</h1>
+        <form id="sentiment-form">
+            <div class="form-group">
+                <label for="comment">Nhập bình luận:</label>
+                <textarea id="comment" class="form-control" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Gửi</button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#sentiment-form').on('submit', function(e) {
+                e.preventDefault();
+                const comment = $('#comment').val().trim();
+                if (!comment) {
+                    $('#result').html('<p class="text-warning">Vui lòng nhập bình luận trước khi gửi.</p>');
+                    return;
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://127.0.0.1:5000/api/predict',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ comment }),
+                    success: function(response) {
+                        let resultHtml = '<h4>Kết quả phân tích:</h4>';
+                        response.forEach(item => {
+                            resultHtml += `<p><strong>Bình luận:</strong> ${item.Comment}</p>`;
+                            resultHtml += `<p><strong>Nhận xét:</strong> ${item.Label}</p>`;
+                        });
+                        $('#result').html(resultHtml);
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON ? xhr.responseJSON.error : 'Lỗi không xác định';
+                        $('#result').html('<p class="text-danger">Có lỗi xảy ra: ' + msg + '</p>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
